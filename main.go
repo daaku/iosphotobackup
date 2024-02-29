@@ -99,7 +99,7 @@ func (a *app) mutSrcTarget(dir string, ext string) (*mutSrcTarget, error) {
 	for {
 		i++
 		if _, err := os.Stat(target); err == nil {
-			//TODO: if they're identical, then overwrite it
+			// TODO: if they're identical, then overwrite it
 			newName := fmt.Sprintf("%s-v%d", name, i)
 			target = filepath.Join(a.Target, fmt.Sprintf("%s.%s", newName, strings.ToUpper(ext)))
 		} else {
@@ -134,7 +134,7 @@ func (a *app) mutationsDir(dcim string) error {
 			}
 		}
 		if srcTarget == nil {
-			//return errors.Errorf("unexpected mutation entry without any FullSizeRender: %s", nameDir)
+			// return errors.Errorf("unexpected mutation entry without any FullSizeRender: %s", nameDir)
 			continue
 		}
 		if err := a.cpOrMv(srcTarget.src, srcTarget.target); err != nil {
@@ -150,6 +150,11 @@ func (a *app) run() error {
 	}
 	if !strings.HasSuffix(a.Target, "/") {
 		a.Target = a.Target + "/"
+	}
+	if !a.DryRun {
+		if err := os.MkdirAll(a.Target, 0o755); err != nil {
+			return errors.WithMessagef(err, "making target directory %q", a.Target)
+		}
 	}
 	if err := a.dcim(); err != nil {
 		return err
@@ -168,7 +173,9 @@ func defaultTarget() string {
 }
 
 func main() {
-	var a = app{
+	// TODO: mkdir target
+	a := app{
+		Mount:  "/mnt/iphone",
 		Target: defaultTarget(),
 	}
 	opts.Parse(&a)
